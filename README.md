@@ -1,7 +1,7 @@
 ## Table of contents
 * [General info](#general-info)
-* [Technologies](#technologies)
-* [Setup](#setup)
+* [Simulation](#technologies)
+* [Real Drone Setup](#setup)
 
 ## General info
 This master thesis on "Autonomous Landing of an Unmanned Aerial Vehicle on a Moving Platform" was implemented in Simulation, using ROS Kinetic and Gazebo 7.
@@ -55,10 +55,21 @@ $ python fsm.py
 
 	
 ## Real Drone Setup
-To run this project, install it locally using npm:
+The aruco detectipn algorithm has already been installed in the real drone in this situation, along with the remaining necessary packages, but if not, the aruco detect package needs to be installed in the drone, the same way it is installed in simulation, and the file to be replaced is called aruco_detect3.launch located in the Real folder.
 
+# Launch Instructions
+To run this project, first all terminals need to be connected to the drone through ssh:
 ```
-$ cd ../lorem
-$ npm install
-$ npm start
+$ ssh apsync@10.0.1.128 -X
+```
+* Password: apsync
+
+Then, run the following launch file to run thr mavros node, the realsense node, the aruco detection node, and the necessary transforms:
+```
+$ roslaunch transforms.launch
+```
+
+On a separate terminal run the python code with the proposed implementation:
+```
+$ python fsm.py
 ```

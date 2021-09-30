@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!-- This is for loading a tag. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <link name="tag_link">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.001" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://multi_jackal_description/meshes/aruco/aruco.dae" scale="1 1 1" />
+      </geometry>
+    </visual>  
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <box size="0.1778 0.1778 1e-05" />
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="aruco_joint" type="fixed">
+    <parent link="base_link" /> <!-- base_link" /> -->
+    <child link="tag_link" />
+    <origin xyz="0 0 0.38" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+  </joint>
+  
+  <!-- Robot 0 has tags 0 to 5, robot 1 has tags 6 to 10 etc.
+       From the perspective of the host robot, the order is: 
+       0: front
+       1: right
+       2: back (upside down)
+       3: left (upside down)
+       4: top (rotated 90deg CW)
+       5: bottom (upside down)
+       
+       If viewed in RVIZ, set the camera to view a face so that it is the right
+       way up. Then each face should have blue (z) coming out of the face,
+       and red going right.
+       
+       For some reason, pose_cov_ops can screw up when using 90 degree angles.
+       A quick fix is setting the TF to be slightly wrong with a 91 degree angle.
+       
+       -->
+       
+  <xacro:property name="num" value="$(arg config_id)" />
+  <xacro:property name="width" value="0.005"/>
+  
+  <link name="aruco_marker_0"></link>    
+  <joint name="aruco_marker_0_joint" type="fixed">
+    <parent link="tag_link" />
+    <child link="aruco_marker_0" />
+    <origin xyz="0 0 ${width}" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="base_link" /> <!-- base_link" /> -->
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+ 
+</robot>

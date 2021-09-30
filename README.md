@@ -73,3 +73,15 @@ On a separate terminal run the python code with the proposed implementation:
 ```
 $ python fsm.py
 ```
+
+## Other recommendations 
+To better visualize the outputs, the following is recommended:
+Subscribe to the markers topic:
+```
+$ rostopic echo /fiducial_transforms
+```
+
+Open the view of the camera:
+```
+$ rqt
+```

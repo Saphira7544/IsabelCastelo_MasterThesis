@@ -11,38 +11,48 @@ class PID(object):
     def __init__(self):
         
         # PID constants when UGV is very close
-        self.Kp_close = 0.4
-        self.Ki_close = 0#0.002
-        self.Kd_close = 0#0.01
+        self.Kp_stat = 0.3
+        self.Ki_stat = 0.002
+        self.Kd_stat = 0.01
+        # PID constants when UGV is far away
+        self.Kp_mov = 0.4
+        self.Ki_mov = 0.05
+        self.Kd_mov = 0.01#0.001
         # PID constants for Z axis
         self.Kp_z = 0.001#0.015
         self.Ki_z = 0.008#0.0025
         self.Kd_z = 0
+
         ##
         self.prev_time = [0, 0, 0, 0]
         self.prev_error = [0.0, 0.0, 0.0, 0.0]
         self.error_i = [0.0, 0.0, 0.0, 0.0]
         self.pid_distance = [0, 0, 0]
 
-    def target_pose(self, curr_pose, marker, hasObs):
+    def target_pose(self, marker, hasObs, isUGVmoving):
         target_angles = [0, 0, 0]
         descent = 0
-        
         e_XY = [marker[0], marker[1]]
         e_Z = marker[2]
         
         # Compute the PID values for X and Y
-        for i in range(len(e_XY)):    
-            
-            kp = self.Kp_close
-            ki = self.Ki_close
-            kd = self.Kd_close
-            
+        for i in range(len(e_XY)):
+            # Set different constants for whether the UGV is moving or not    
+            if(isUGVmoving):
+                kp = self.Kp_mov
+                ki = self.Ki_mov
+                kd = self.Kd_mov
+            else:
+                kp = self.Kp_stat
+                ki = self.Ki_stat
+                kd = self.Kd_stat
+
+            # Compute the PID output for X and Y
             self.pid_distance[i] = self.calc_error(e_XY[i], i, kp, ki, kd)
 
-        # Compute the PID values for Z
-        if(hasObs):
-
+        # Compute the PID output for Z
+        if(hasObs): # Only descend if currently seeing a marker
+            # Failsafe measure to avoid going bellow a height when not aligned
             if( self.pythagoras(e_XY[0], e_XY[1]) > 0.1  and e_Z <= 0.7 ):
                 kp_z = 0;               ki_z = 0;               kd_z = 0
 
@@ -50,10 +60,12 @@ class PID(object):
                 kp_z = self.Kp_z;   ki_z = self.Ki_z;   kd_z = self.Kd_z
             
             descent = self.calc_error(e_Z, 2, kp_z, ki_z, kd_z)
-
+            # Aggressive descent when nearly landed
             if( self.pythagoras(e_XY[0], e_XY[1]) <= 0.1  and e_Z <= 0.7 ):
                 descent = 1.2
-        else:
+        # Keep calculating the PID outputs with zeros, when not seeing a marker so 
+        # that a very old measurement doesn't exponentially increase the integral part
+        else: 
             descent = self.calc_error(0, 2, 0, 0, 0)
 
 
@@ -96,15 +108,9 @@ class PID(object):
         D = kd*error_d
 
         return P + I + D
-     
-    def compensate_yaw(self, roll, pitch, yaw):
-        """
-            Change the angles depending on the current yaw
-        """
-        roll_B = roll*math.cos( yaw ) + pitch*math.sin( yaw )        
-        pitch_B = -roll*math.sin( yaw ) + pitch*math.cos( yaw )
-
-        return [roll_B, pitch_B]
 
     def pythagoras(self, c1, c2):
+        """
+            Compute the pythagoras theorem
+        """
         return math.sqrt(pow(c1,2)+pow(c2,2))

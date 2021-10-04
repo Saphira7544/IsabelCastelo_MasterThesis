@@ -11,9 +11,9 @@ class PID(object):
     def __init__(self):
         
         # PID constants when UGV is very close
-        self.Kp_stat = 0.3
-        self.Ki_stat = 0.002
-        self.Kd_stat = 0.01
+        self.Kp_stat = 0.4
+        self.Ki_stat = 0#0.002
+        self.Kd_stat = 0#0.01
         # PID constants when UGV is far away
         self.Kp_mov = 0.4
         self.Ki_mov = 0.05
@@ -29,7 +29,7 @@ class PID(object):
         self.error_i = [0.0, 0.0, 0.0, 0.0]
         self.pid_distance = [0, 0, 0]
 
-    def target_pose(self, marker, hasObs, isUGVmoving):
+    def target_pose(self, marker, hasObs):
         target_angles = [0, 0, 0]
         descent = 0
         e_XY = [marker[0], marker[1]]
@@ -38,14 +38,9 @@ class PID(object):
         # Compute the PID values for X and Y
         for i in range(len(e_XY)):
             # Set different constants for whether the UGV is moving or not    
-            if(isUGVmoving):
-                kp = self.Kp_mov
-                ki = self.Ki_mov
-                kd = self.Kd_mov
-            else:
-                kp = self.Kp_stat
-                ki = self.Ki_stat
-                kd = self.Kd_stat
+	    kp = self.Kp_stat
+	    ki = self.Ki_stat
+	    kd = self.Kd_stat
 
             # Compute the PID output for X and Y
             self.pid_distance[i] = self.calc_error(e_XY[i], i, kp, ki, kd)
@@ -61,12 +56,15 @@ class PID(object):
             
             descent = self.calc_error(e_Z, 2, kp_z, ki_z, kd_z)
             # Aggressive descent when nearly landed
-            if( self.pythagoras(e_XY[0], e_XY[1]) <= 0.1  and e_Z <= 0.7 ):
-                descent = 1.2  
+            #if( self.pythagoras(e_XY[0], e_XY[1]) <= 0.1  and e_Z <= 0.7 ):
+            #    descent = 0.3
         # Keep calculating the PID outputs with zeros, when not seeing a marker so 
         # that a very old measurement doesn't exponentially increase the integral part
-        else: 
+        else:
             descent = self.calc_error(0, 2, 0, 0, 0)
+
+        if(  e_Z <= 0.6 ): 
+	        descent = 0.35
 
 
         target_angles = [self.pid_distance[0],

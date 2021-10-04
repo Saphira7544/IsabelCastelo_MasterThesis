@@ -29,7 +29,6 @@ class Publisher(object):
         ## Publishers ##
         self.pub_vel = rospy.Publisher('/mavros/setpoint_velocity/cmd_vel_unstamped', Twist, queue_size=1)
         ## Iris Variables ##
-        self.pos = [0, 0, 0, 0, 0, 0]
 
         self.obs = []
         self.hasObs = False
@@ -49,7 +48,7 @@ class Publisher(object):
 
             if(self.firstObs == True) : 
 
-                target_angles = self.pid.target_pose(self.pos, self.obs, self.hasObs) 
+                target_angles = self.pid.target_pose(self.obs, self.hasObs) 
                 print("Target angles: ", target_angles)
                 self.vel(target_angles)
                 self.rate.sleep()
@@ -82,12 +81,13 @@ class Publisher(object):
             try:
                 marker_id = "fiducial_T_" + str(marker.fiducial_id)
                 (trans, rot) = self.listener.lookupTransform('base_link', marker_id, rospy.Time(0))
+		print("TRANS:", trans)
 
                 # Store the measurements of each marker
                 observations[i] = np.array([marker.fiducial_id,
-                    trans[1],
-                    trans[2],
-                    trans[0] ]) #The x is pointing downwards in the camera frame, therefore it's the z
+                    trans[0],
+                    -trans[1],
+                    trans[2] ]) #The x is pointing downwards in the camera frame, therefore it's the z
 
                 self.hasObs = True
                 self.firstObs = True
@@ -113,7 +113,7 @@ class Publisher(object):
         msg_iris = Twist()
         msg_iris.linear.x = target_angles[0]
         msg_iris.linear.y = target_angles[1]
-        #msg_iris.linear.z = - target_angles[2]
+        msg_iris.linear.z = - target_angles[2]
 
         self.pub_vel.publish(msg_iris)
 

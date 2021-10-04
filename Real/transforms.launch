@@ -10,6 +10,11 @@
 
     <include file="$(find aruco_detect)/launch/aruco_detect3.launch"> </include>
 
+   <group> 
+       <node pkg="image_transport" type="republish" name="rgb_compress" args="raw in:=/camera/color/image_raw compressed out:=/camera/color/image_raw"/>
+
+    </group> 
+
     <group>
        <node pkg="tf" type="static_transform_publisher" name="marker946_broadcaster" args="0 -0.10345 0 0 0 0 fiducial_946 fiducial_T_946 10"/>
 
@@ -20,9 +25,7 @@
        <node pkg="tf" type="static_transform_publisher" name="marker55_broadcaster" args="-0.06175 0.06175 0 0 0 0 fiducial_55 fiducial_T_55 10"/>
 
        <node pkg="tf" type="static_transform_publisher" name="cam_broadcaster" args="-0.07 0 0 0 -1.57 0 base_link camera_link 10"/>
+   </group> 
 
-       <node pkg="image_transport" type="republish" name="rgb_compress" args="raw in:=/camera/color/image_raw compressed out:=/camera/color/image_raw">
-
-    </group> 
 
 </launch>

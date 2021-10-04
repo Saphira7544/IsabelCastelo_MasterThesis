@@ -103,19 +103,10 @@ def main():
         # Add the concurrence container to the State Machine
         smach.StateMachine.add('Landing_Con', sm_con,
                                     transitions={'lostMarker':'WaitAtHome',
-                                                'landed':'DisarmMotors'})
+                                                'landed':'finished'})
 
 
 
-        #smach.StateMachine.add('LandingSequence', LandingSequence(),
-        #                            transitions={'landed':'DisarmMotors'})
-
-        smach.StateMachine.add('DisarmMotors',
-                                smach_ros.ServiceState('/mavros/cmd/arming',
-                                            CommandBool,
-                                            request = 0),
-                                transitions = {'succeeded':'finished'})
-    
     #Execute SMACH plan
     outcome = sm.execute()
 

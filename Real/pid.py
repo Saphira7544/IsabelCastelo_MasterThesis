@@ -62,7 +62,7 @@ class PID(object):
             descent = self.calc_error(e_Z, 2, kp_z, ki_z, kd_z)
             # Aggressive descent when nearly landed
             if( self.pythagoras(e_XY[0], e_XY[1]) <= 0.1  and e_Z <= 0.7 ):
-                descent = 1.2
+                descent = 1.2  
         # Keep calculating the PID outputs with zeros, when not seeing a marker so 
         # that a very old measurement doesn't exponentially increase the integral part
         else: 
